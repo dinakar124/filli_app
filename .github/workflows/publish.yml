@@ -1,0 +1,70 @@
+name: Publish to Firefox Add-ons Store
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run unit tests
+        run: node --test 'tests/*.test.js'
+
+  publish:
+    name: Submit to AMO
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install web-ext
+        run: npm install -g web-ext
+
+      - name: Lint extension
+        run: web-ext lint
+
+      - name: Read version from manifest
+        id: version
+        run: |
+          VERSION=$(node -e "console.log(require('./manifest.json').version)")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build extension package
+        run: >
+          web-ext build
+          --overwrite-dest
+          --ignore-files "tests/**" "lib/**" "package.json" "package-lock.json"
+          "node_modules/**" ".github/**" ".gitignore" ".web-ext-ignore"
+          "icons/filli-icon.svg" "README.md"
+
+      - name: Sign and submit to AMO
+        run: >
+          web-ext sign
+          --channel listed
+          --source-dir .
+          --artifacts-dir web-ext-artifacts
+          --api-key "${{ secrets.AMO_API_KEY }}"
+          --api-secret "${{ secrets.AMO_API_SECRET }}"
+          --ignore-files "tests/**" "lib/**" "package.json" "package-lock.json"
+          "node_modules/**" ".github/**" ".gitignore" ".web-ext-ignore"
+          "icons/filli-icon.svg" "README.md"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: filli-${{ steps.version.outputs.version }}
+          path: web-ext-artifacts/*.xpi

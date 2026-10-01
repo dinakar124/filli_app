@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.25"/>
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Rounded square background -->
+  <rect x="4" y="4" width="120" height="120" rx="28" ry="28" fill="url(#bg)"/>
+  
+  <!-- Subtle shine overlay -->
+  <rect x="4" y="4" width="120" height="60" rx="28" ry="28" fill="url(#shine)"/>
+  
+  <!-- Form field lines (representing a form) -->
+  <rect x="28" y="34" width="52" height="8" rx="4" fill="white" opacity="0.9"/>
+  <rect x="28" y="52" width="40" height="8" rx="4" fill="white" opacity="0.5"/>
+  <rect x="28" y="70" width="46" height="8" rx="4" fill="white" opacity="0.3"/>
+  
+  <!-- Sparkle/magic star (the ✨ from the UI) -->
+  <!-- Main 4-point star -->
+  <g transform="translate(88, 42)">
+    <path d="M0,-16 C0,-4 4,0 16,0 C4,0 0,4 0,16 C0,4 -4,0 -16,0 C-4,0 0,-4 0,-16Z" fill="white" opacity="0.95"/>
+  </g>
+  
+  <!-- Small sparkle accent -->
+  <g transform="translate(72, 82) scale(0.4)">
+    <path d="M0,-16 C0,-4 4,0 16,0 C4,0 0,4 0,16 C0,4 -4,0 -16,0 C-4,0 0,-4 0,-16Z" fill="white" opacity="0.7"/>
+  </g>
+  
+  <!-- Tiny sparkle dot -->
+  <circle cx="96" cy="72" r="3" fill="white" opacity="0.6"/>
+</svg>
