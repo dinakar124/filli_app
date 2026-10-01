@@ -16,7 +16,7 @@ jobs:
           node-version: '20'
 
       - name: Run unit tests
-        run: node --test 'tests/*.test.js'
+        run: node --test tests/*.test.js
 
   publish:
     name: Submit to AMO
