@@ -1,0 +1,206 @@
+{
+  "profile": {
+    "firstName": "Dinakar",
+    "lastName": "Meruga",
+    "fullName": "Dinakar Meruga",
+    "email": "",
+    "phone": "",
+    "linkedin": "",
+    "github": "",
+    "website": "",
+    "location": "Minneapolis, MN",
+    "postalCode": ""
+  },
+  "pairs": [
+    {
+      "id": "seed-why-company",
+      "question": "Why do you want to work at [company]?",
+      "answer": "I've spent the last 5 years building high-performance, multi-platform consumer experiences at Amazon Fire TV (200M+ devices) and Best Buy. What draws me to [company] specifically is [research the company -- mission, product, stage]. My experience shipping across Android native (Kotlin/Compose), React Native, and backend services maps directly to the full-stack nature of the work, and I'm most productive when I can own a feature end-to-end rather than working in one narrow layer.",
+      "source": "template",
+      "tags": ["why-company", "template"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-impressive-project",
+      "question": "What is the most impressive project you've worked on? Why is it impressive?",
+      "answer": "The Fire TV Burton navigation architecture -- a complete reimagining of how 200M+ Fire TV devices render their home screen. I designed and shipped a system where all navigation tabs stay live simultaneously as ViewModelContainers, with distance-ordered background preloading and a Compose-based precomposer that keeps bitmaps resident for only the nearest 3 tabs. A 7-tier device-eligibility rollout system let us ship two completely different UI architectures in the same APK with zero downtime. The crash rate on the navigation path dropped 73% and tab-switch latency improved 28%.",
+      "source": "nuvo-application",
+      "tags": ["impressive-project", "android"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 2
+    },
+    {
+      "id": "seed-non-engineers",
+      "question": "Tell us about a time you built a feature for users who weren't engineers (analysts, coaches, operations staff, etc.). How did you figure out what they actually needed, and how did that shape your technical approach?",
+      "answer": "At Amazon Fire TV, I built internal diagnostic and device-state tooling for operations and QA teams. They were manually cross-referencing 3 dashboards and a spreadsheet to answer 'why does this device show a different home screen?'\n\nI sat in on their triage calls. The real need wasn't 'a better dashboard' -- it was a single answer to 'what is this device running and why?'\n\nI built a device-state lookup tool that took a DSN, queried the 7-tier eligibility resolution system I'd designed, and returned a plain-English breakdown. The backend queried the same eligibility code the launcher uses (ground truth). The frontend was a simple React form -- paste a DSN, get the answer. I showed only the winning tier, with a collapsible 'full chain' for the curious.",
+      "source": "pirates-application",
+      "tags": ["non-engineers", "internal-tools"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 1
+    },
+    {
+      "id": "seed-fullstack-feature",
+      "question": "Walk us through a full-stack feature you owned end to end, from planning through release and support.",
+      "answer": "The 'Offers for You' personalized recommendation slider at Best Buy Mobile. Backend: GraphQL endpoint returning ranked product cards with pricing, badge logic, and deep-link URLs. Frontend: React Native horizontal ScrollView with lazy-loaded cards, impression tracking (50%+ visibility for 1+ second), and prefetched images for the first 5 cards. Chose ScrollView over FlatList because the set was capped at 20 items. Feature flag, 10% -> 50% -> 100% rollout. 17% MAU engagement uplift. Added a lightweight price-check on render for visible cards to fix stale-pricing complaints.",
+      "source": "pirates-application",
+      "tags": ["fullstack", "end-to-end"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 1
+    },
+    {
+      "id": "seed-tricky-bug",
+      "question": "Describe a tricky bug or production issue you tracked down. How did you find the root cause?",
+      "answer": "A production crash on Fire TV affecting 60K+ occurrences across 11 hardware targets. NPE in LayoutNodeDrawScope.drawContent() attributed to ImageCache$1. Decompiled the debug APK's smali and confirmed R8 had horizontally merged an unrelated lambda into ImageCache$1's class slot. The real origin was a GraphicsLayer recording from a draw-modifier node mid-attach/detach. Root cause: a @Composable modifier with an early 'return this' before remember/DisposableEffect calls, causing slot table desynchronization. Fix: restored composed{}. Added slot-stability test, CI audit for conditional returns before slot-producing calls, and 'verify crash branch matches crashing build' as mandatory RCA step. Crash rate dropped 73%.",
+      "source": "pirates-application",
+      "tags": ["bug", "production", "android"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 1
+    },
+    {
+      "id": "seed-internal-platforms",
+      "question": "What interests you about building internal platforms?",
+      "answer": "The leverage and feedback loop. At Amazon Fire TV, I replaced a manual 3-dashboard cross-referencing workflow with a single lookup tool. Operations staff stopped escalating questions to engineering. Internal platforms have a uniquely fast feedback loop: ship Tuesday, watch people use it Wednesday, fix Thursday. Building for Operations, Support, Marketing, and Risk teams forces discipline about API design, permissions, and progressive disclosure -- a harder design problem than most consumer products.",
+      "source": "pirates-application",
+      "tags": ["internal-platforms"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 1
+    },
+    {
+      "id": "seed-interesting-technology",
+      "question": "What's the most interesting technology you've discovered recently? How does it work?",
+      "answer": "I built a fully automated job scanning pipeline using an autonomous agent management layer (Kiro Crew). It runs as a macOS LaunchAgent daemon, hourly fetching listings from multiple job boards, scoring them against my resume using embedding-based pre-filtering plus LLM evaluation, auto-generating tailored resumes, and delivering matches via iMessage. Circuit breaker state machines per data source prevent cascading failures. Two-layer relevance filtering -- fast regex cuts 84% of junk, LLM catches edge cases. Outcome-calibrated scoring from real application history. Survives sleep/crashes/reboots via launchd.",
+      "source": "nuvo-application",
+      "tags": ["technology", "ai"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 2
+    },
+    {
+      "id": "seed-proudest-android",
+      "question": "Please share your proudest Android feature in 2-3 sentences. What made it challenging and what was the impact?",
+      "answer": "The Burton navigation architecture on Fire TV -- a Jetpack Compose system where all home screen tabs stay live simultaneously with distance-ordered background preloading and a compositor that keeps bitmaps resident for only the nearest 3 tabs. The challenge was making sub-frame tab switches work reliably across 11 hardware targets within a shared 26MB image budget, while shipping two different UI architectures in one APK via a 7-tier remote config rollout. It reduced tab-switch latency by 28% and dropped navigation crash rates 73% across 200M+ devices.",
+      "source": "ramp-application",
+      "tags": ["android", "proud"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 1
+    },
+    {
+      "id": "seed-large-user-base",
+      "question": "Have you contributed to a mobile app(s) and/or several features that reached a large number of users? Please describe.",
+      "answer": "Yes -- the Amazon Fire TV Launcher ships to 200M+ registered devices globally. I've owned features across the full home screen: the Burton navigation system, personalized content recommendation carousels, device-eligibility rollout architecture, and VoiceView accessibility improvements. Before that, I built 12 user-facing features in the Best Buy mobile app (React Native, millions of MAU), including the 'Offers for You' personalized recommendation slider that drove a 17% uplift in monthly active engagement.",
+      "source": "ramp-application",
+      "tags": ["scale", "users"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 1
+    },
+    {
+      "id": "seed-authorized-us",
+      "question": "Are you legally authorized to work in the United States?",
+      "answer": "Yes",
+      "source": "common",
+      "tags": ["legal", "quick"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 5
+    },
+    {
+      "id": "seed-sponsorship",
+      "question": "Do you now, or will you ever, require employment sponsorship to work in the country where this job is located?",
+      "answer": "No",
+      "source": "common",
+      "tags": ["legal", "quick"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 5
+    },
+    {
+      "id": "seed-ai-tools",
+      "question": "Are you familiar with or open to using AI tools (such as Github Copilot, ChatGPT, Claude Code, Cursor) to assist with writing code or problem solving?",
+      "answer": "Yes",
+      "source": "ramp-application",
+      "tags": ["ai", "quick"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 2
+    },
+    {
+      "id": "seed-android-years",
+      "question": "How many years of Android mobile app development experience do you have?",
+      "answer": "4+",
+      "source": "common",
+      "tags": ["experience", "quick"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 2
+    },
+    {
+      "id": "seed-ai-fluency",
+      "question": "What is your fluency level with modern coding workflows?",
+      "answer": "Controlled Delegation to AI & Agentic Workflows",
+      "source": "suno-application",
+      "tags": ["ai", "quick"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 1
+    },
+    {
+      "id": "seed-bachelors",
+      "question": "Do you have a Bachelor's degree?",
+      "answer": "Yes",
+      "source": "common",
+      "tags": ["education", "quick"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 1
+    },
+    {
+      "id": "seed-kotlin-exp",
+      "question": "Do you have experience with Kotlin?",
+      "answer": "Yes",
+      "source": "common",
+      "tags": ["skills", "quick"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 1
+    },
+    {
+      "id": "seed-mobile-exp-min",
+      "question": "Do you have a minimum of 2 years of mobile engineering experience, not including internships?",
+      "answer": "Yes",
+      "source": "common",
+      "tags": ["experience", "quick"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 1
+    },
+    {
+      "id": "seed-privacy-agree",
+      "question": "I agree to the privacy policy",
+      "answer": "Yes",
+      "source": "common",
+      "tags": ["legal", "quick"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-in-office-ack",
+      "question": "Please confirm that you have read and understand the in-office expectations and policy",
+      "answer": "Yes",
+      "source": "common",
+      "tags": ["legal", "quick"],
+      "created": "2026-09-30T21:00:00.000Z",
+      "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 0
+    }
+  ]
+}

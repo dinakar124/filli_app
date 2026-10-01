@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 400px;
+      max-height: 560px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      color: #1e293b;
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 12px 14px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 { font-size: 15px; font-weight: 600; }
+    .header .count {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+    .tab {
+      flex: 1;
+      padding: 8px 4px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 500;
+      color: #64748b;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+    .tab:hover { background: #f1f5f9; }
+
+    .search {
+      padding: 8px 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .search input {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 12px;
+      outline: none;
+    }
+    .search input:focus { border-color: #6366f1; }
+
+    .content {
+      max-height: 380px;
+      overflow-y: auto;
+      padding: 6px;
+    }
+
+    .qa-item {
+      padding: 10px;
+      border-radius: 8px;
+      margin: 4px 0;
+      border: 1px solid #f1f5f9;
+      transition: all 0.1s;
+    }
+    .qa-item:hover { background: #f8fafc; border-color: #e2e8f0; }
+
+    .qa-question {
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .qa-answer {
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .qa-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: #94a3b8;
+    }
+    .qa-actions { display: flex; gap: 4px; }
+    .qa-actions button {
+      padding: 3px 8px;
+      border: none;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+      background: #f1f5f9;
+      color: #475569;
+    }
+    .qa-actions button:hover { background: #e2e8f0; }
+    .qa-actions .delete-btn { color: #ef4444; }
+    .qa-actions .delete-btn:hover { background: #fef2f2; }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #94a3b8;
+    }
+    .empty-state .emoji { font-size: 32px; margin-bottom: 8px; }
+    .empty-state p { font-size: 12px; line-height: 1.5; }
+
+    .form-section { padding: 12px; }
+    .form-section label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      margin: 8px 0 4px;
+    }
+    .form-section label:first-child { margin-top: 0; }
+    .form-section input[type="text"],
+    .form-section input[type="email"],
+    .form-section input[type="tel"],
+    .form-section input[type="url"],
+    .form-section textarea {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: inherit;
+      outline: none;
+    }
+    .form-section input:focus,
+    .form-section textarea:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 2px rgba(99,102,241,0.1);
+    }
+    .form-section textarea { resize: vertical; }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 8px;
+    }
+    .btn-primary { background: #6366f1; color: #fff; }
+    .btn-primary:hover { background: #4f46e5; }
+    .btn-success { background: #22c55e; color: #fff; }
+    .btn-success:hover { background: #16a34a; }
+    .btn-secondary { background: #475569; color: #fff; }
+    .btn-secondary:hover { background: #334155; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+
+    .btn-row { display: flex; gap: 6px; margin-top: 4px; }
+    .btn-row .btn { flex: 1; margin-top: 0; }
+
+    .profile-saved {
+      color: #16a34a;
+      font-size: 11px;
+      font-weight: 500;
+      margin-top: 6px;
+      display: none;
+    }
+    .profile-saved.show { display: block; }
+
+    .hidden { display: none; }
+    .section-divider {
+      margin: 12px 0 8px;
+      padding-top: 12px;
+      border-top: 1px solid #e2e8f0;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+    }
+    .hint {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>✨ Job Autofill</h1>
+    <span class="count" id="count">0 answers</span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="library">Library</div>
+    <div class="tab" data-tab="profile">Profile</div>
+    <div class="tab" data-tab="add">+ Add</div>
+    <div class="tab" data-tab="settings">Settings</div>
+  </div>
+
+  <!-- Library tab -->
+  <div id="tab-library">
+    <div class="search">
+      <input type="text" id="search" placeholder="Search saved answers...">
+    </div>
+    <div class="content" id="qa-list"></div>
+  </div>
+
+  <!-- Profile tab -->
+  <div id="tab-profile" class="hidden">
+    <div class="form-section content">
+      <p class="hint">
+        Personal info auto-fills name, email, phone, LinkedIn, and location fields instantly.
+      </p>
+
+      <label>First Name</label>
+      <input type="text" id="prof-firstName" placeholder="Dinakar">
+      <label>Last Name</label>
+      <input type="text" id="prof-lastName" placeholder="Meruga">
+      <label>Email</label>
+      <input type="email" id="prof-email" placeholder="you@example.com">
+      <label>Phone</label>
+      <input type="tel" id="prof-phone" placeholder="+1 (555) 123-4567">
+
+      <div class="section-divider">Links</div>
+      <label>LinkedIn Profile URL</label>
+      <input type="url" id="prof-linkedin" placeholder="https://linkedin.com/in/yourprofile">
+      <label>GitHub / Portfolio URL</label>
+      <input type="url" id="prof-github" placeholder="https://github.com/yourname">
+      <label>Personal Website</label>
+      <input type="url" id="prof-website" placeholder="https://yoursite.com">
+
+      <div class="section-divider">Location</div>
+      <label>Location (City, State)</label>
+      <input type="text" id="prof-location" placeholder="Minneapolis, MN">
+      <label>Postal / Zip Code</label>
+      <input type="text" id="prof-postalCode" placeholder="55401">
+
+      <button class="btn btn-primary" id="save-profile">Save Profile</button>
+      <div class="profile-saved" id="profile-saved-msg">✓ Profile saved</div>
+    </div>
+  </div>
+
+  <!-- Add tab -->
+  <div id="tab-add" class="hidden">
+    <div class="form-section">
+      <label>Question</label>
+      <textarea id="new-question" rows="2" placeholder='e.g. "Why do you want to work at [company]?"'></textarea>
+      <label>Answer</label>
+      <textarea id="new-answer" rows="8" placeholder="Your answer..."></textarea>
+      <button class="btn btn-primary" id="save-new">Save Answer</button>
+    </div>
+  </div>
+
+  <!-- Settings tab -->
+  <div id="tab-settings" class="hidden">
+    <div class="form-section">
+      <label>Seed from Tonight's Applications</label>
+      <p class="hint">Import 13 pre-built Q&A pairs from the application session.</p>
+      <button class="btn btn-success" id="seed-answers">Seed from Jobscanner History</button>
+
+      <div class="section-divider">Export / Import</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="export-btn">Export JSON</button>
+        <button class="btn btn-secondary" id="import-btn">Import JSON</button>
+      </div>
+      <input type="file" id="import-file" accept=".json" class="hidden">
+
+      <div class="section-divider">Danger Zone</div>
+      <button class="btn btn-danger" id="clear-all">Clear All Saved Answers</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

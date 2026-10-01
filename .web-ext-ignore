@@ -1,0 +1,11 @@
+tests/
+lib/
+*.test.js
+package.json
+package-lock.json
+node_modules/
+web-ext-artifacts/
+.web-extension-id
+.gitignore
+.web-ext-ignore
+README.md

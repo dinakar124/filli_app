@@ -1,0 +1,78 @@
+{
+  "manifest_version": 2,
+  "name": "Job Application Autofill",
+  "version": "2.0.0",
+  "description": "Auto-fill job application forms from saved Q&A pairs and profile data. Handles text, dropdowns, radio buttons, and checkboxes. Learns new answers as you apply.",
+  "author": "Dinakar Meruga",
+  "homepage_url": "https://github.com/dinakar124/job-autofill-extension",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "contextMenus"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "job-autofill@dinakar.dev",
+      "strict_min_version": "109.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
+  "icons": {
+    "48": "icons/icon-48.png",
+    "96": "icons/icon-96.png"
+  },
+  "browser_action": {
+    "default_icon": "icons/icon-48.png",
+    "default_title": "Job Autofill",
+    "default_popup": "popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://boards.greenhouse.io/*",
+        "*://job-boards.greenhouse.io/*",
+        "*://jobs.lever.co/*",
+        "*://jobs.ashbyhq.com/*",
+        "*://*.myworkdayjobs.com/*",
+        "*://*.workday.com/*",
+        "*://*.icims.com/*",
+        "*://*.taleo.net/*",
+        "*://*.smartrecruiters.com/*",
+        "*://*.jobvite.com/*",
+        "*://*.breezy.hr/*",
+        "*://*.bamboohr.com/*",
+        "*://*.jazz.co/*",
+        "*://*.recruitee.com/*",
+        "*://*.gem.com/*",
+        "*://*.dover.com/*",
+        "*://*.rippling.com/*",
+        "*://*.linkedin.com/*",
+        "*://*.indeed.com/*",
+        "*://*.wellfound.com/*",
+        "*://*.applytojob.com/*",
+        "*://*.comeet.com/*",
+        "*://*.fountain.com/*",
+        "*://*.hire.trakstar.com/*",
+        "*://*.jazzhr.com/*",
+        "*://*.paylocity.com/*",
+        "*://*.ultipro.com/*",
+        "*://*.successfactors.com/*",
+        "*://*/*careers*",
+        "*://*/*jobs*",
+        "*://*/*apply*",
+        "*://*/*application*",
+        "*://*/*hiring*",
+        "*://*/*openings*",
+        "*://*/*position*"
+      ],
+      "js": ["content/autofill.js"],
+      "css": ["content/autofill.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  }
+}
