@@ -38,7 +38,8 @@
   const PROFILE_FIELDS = [
     'firstName', 'lastName', 'email', 'phone',
     'linkedin', 'github', 'website',
-    'location', 'postalCode'
+    'location', 'postalCode',
+    'school', 'degree', 'major'
   ];
 
   async function loadProfileForm() {

@@ -9,7 +9,10 @@
     "github": "",
     "website": "",
     "location": "Minneapolis, MN",
-    "postalCode": ""
+    "postalCode": "",
+    "school": "St. Cloud State University",
+    "degree": "Master's Degree",
+    "major": "Computer Science"
   },
   "pairs": [
     {
@@ -200,6 +203,76 @@
       "tags": ["legal", "quick"],
       "created": "2026-09-30T21:00:00.000Z",
       "updated": "2026-09-30T21:00:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-hard-bug",
+      "question": "Describe a bug or problem that took you much longer than expected to solve. What was actually going on and how did you figure it out?",
+      "answer": "A production crash on Fire TV affecting 60K+ occurrences across 11 hardware targets -- an NPE in LayoutNodeDrawScope.drawContent() that the stack trace attributed to ImageCache$1. I spent days investigating ImageCache before realizing R8 had horizontally merged a completely unrelated lambda into that class slot. I confirmed it by decompiling the debug APK's smali and matching the class shape against the crash frame's method signature. The real origin was a @Composable modifier with a conditional early return that desynchronized Compose's slot table, tearing draw-modifier coordinator chains during recomposition. What made it take so long: I initially investigated the wrong branch (mainline instead of the hotfix branch the crashing build was actually cut from), and the R8 relabeling meant the stack trace was literally pointing at the wrong class.",
+      "source": "common",
+      "tags": ["bug", "debugging", "hard-problem"],
+      "created": "2026-09-30T21:30:00.000Z",
+      "updated": "2026-09-30T21:30:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-self-initiated",
+      "question": "Tell us about something you built that nobody required you to build. What was it and why did you build it?",
+      "answer": "An autonomous job scanning pipeline. I was applying to dozens of roles and spending hours on mechanical work -- searching boards, reading JDs, retyping the same answers. So I built a system that runs as a macOS LaunchAgent daemon, hourly scraping Greenhouse/Lever/Ashby career pages, scoring roles against my resume with a two-layer filter (regex pre-filter cuts 84% of junk, then LLM evaluation for career-trajectory fit), auto-generating tailored resumes, and delivering matches via iMessage with the PDF attached. I also built Filli -- a browser extension that auto-fills job application forms from saved answers -- because I was still retyping the same application answers on every form. Nobody asked for either. I built them because the problem was repetitive and solvable.",
+      "source": "common",
+      "tags": ["initiative", "side-project", "self-motivated"],
+      "created": "2026-09-30T21:30:00.000Z",
+      "updated": "2026-09-30T21:30:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-learning-curve",
+      "question": "What part of this role do you expect to be your steepest learning curve and why?",
+      "answer": "The domain-specific context. I can ship Android features, debug production crashes, and build backend services -- that transfers anywhere. What doesn't transfer is understanding how this company's product actually works for its users, what the existing codebase's unwritten assumptions are, and which past architectural decisions constrain what's possible now. Every codebase has a history that isn't in the docs. That's the part that takes time and can't be shortcut -- you have to read the code, ask questions, and ship a few features before you really understand the system.",
+      "source": "common",
+      "tags": ["self-awareness", "growth", "learning"],
+      "created": "2026-09-30T21:30:00.000Z",
+      "updated": "2026-09-30T21:30:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-veteran-status",
+      "question": "Have you ever served in the military?",
+      "answer": "Prefer not to say",
+      "source": "common",
+      "tags": ["demographic", "voluntary"],
+      "created": "2026-09-30T21:35:00.000Z",
+      "updated": "2026-09-30T21:35:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-gender",
+      "question": "Which of the following best describes your gender?",
+      "answer": "Prefer not to say",
+      "source": "common",
+      "tags": ["demographic", "voluntary"],
+      "created": "2026-09-30T21:35:00.000Z",
+      "updated": "2026-09-30T21:35:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-race-ethnicity",
+      "question": "Which of the following best describes your racial or ethnic identity?",
+      "answer": "Prefer not to say",
+      "source": "common",
+      "tags": ["demographic", "voluntary"],
+      "created": "2026-09-30T21:35:00.000Z",
+      "updated": "2026-09-30T21:35:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-disability",
+      "question": "Do you have a disability?",
+      "answer": "Prefer not to say",
+      "source": "common",
+      "tags": ["demographic", "voluntary"],
+      "created": "2026-09-30T21:35:00.000Z",
+      "updated": "2026-09-30T21:35:00.000Z",
       "useCount": 0
     }
   ]
