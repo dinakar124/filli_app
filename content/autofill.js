@@ -66,12 +66,14 @@
     const container = field.closest(
       '[class*="field"], [class*="question"], [class*="form-group"], ' +
       '[class*="form-field"], [data-qa], [class*="application-question"], ' +
-      '[class*="custom-question"], [class*="section-field"]'
+      '[class*="custom-question"], [class*="section-field"], ' +
+      '[class*="jobs-easy-apply"], [class*="fb-dash-form-element"]'
     );
     if (container) {
       const heading = container.querySelector(
         'h1, h2, h3, h4, h5, label, [class*="label"], [class*="title"], ' +
-        '[class*="question"], [class*="prompt"], legend'
+        '[class*="question"], [class*="prompt"], legend, ' +
+        '[class*="artdeco-text-input--label"], span[aria-hidden="true"]'
       );
       if (heading && heading.textContent.trim().length > 3) {
         return heading.textContent.trim();
@@ -107,6 +109,12 @@
     { patterns: [/^portfolio/i, /^website/i, /^personal\s*(website|site|url)/i], key: 'website' },
     { patterns: [/^location/i, /^city/i, /^address/i, /^where.*(?:based|located|live)/i], key: 'location' },
     { patterns: [/^postal\s*code/i, /^zip\s*code/i, /^zip/i, /postal\s*code/i, /zip\s*code/i], key: 'postalCode' },
+    { patterns: [/^school/i, /^university/i, /^college/i, /^institution/i], key: 'school' },
+    { patterns: [/^degree/i, /^education.*level/i, /^highest.*degree/i], key: 'degree' },
+    { patterns: [/^field.*study/i, /^major/i, /^concentration/i, /^discipline/i], key: 'major' },
+    { patterns: [/^country\s*code/i, /^phone.*country/i, /^dialing.*code/i], key: 'countryCode' },
+    { patterns: [/^country$/i, /^country\s*\*/i, /^country\s*\(required\)/i], key: 'country' },
+    { patterns: [/^state$/i, /^state\s*\*/i, /^province/i, /^state.*province/i], key: 'state' },
   ];
 
   function matchProfileField(questionText) {
@@ -190,6 +198,39 @@
       addField(f, 'contenteditable');
     });
 
+    // LinkedIn custom dropdowns: these are <select> elements visually hidden
+    // inside artdeco wrappers, or div[role="listbox"]/div[role="combobox"]
+    // The actual <select> is present but sometimes has display:none — find it
+    // Also handle custom dropdowns that use a trigger button + hidden listbox
+    document.querySelectorAll('[data-test-text-selectable-option], [class*="artdeco-dropdown"], [role="listbox"]').forEach(f => {
+      // Find the nearest native <select> sibling or child
+      const container = f.closest('[class*="field"], [class*="form-component"], [class*="fb-dash"]');
+      if (container) {
+        const nativeSelect = container.querySelector('select');
+        if (nativeSelect && !seen.has(nativeSelect)) {
+          addField(nativeSelect, 'select');
+        }
+      }
+    });
+
+    // Custom searchable dropdowns (Greenhouse custom, Workday, etc.)
+    // These render as a button/div trigger + hidden listbox/combobox
+    // Detect by: role="combobox", [class*="select"], button with aria-haspopup
+    document.querySelectorAll(
+      '[role="combobox"]:not(input):not(textarea), ' +
+      'button[aria-haspopup="listbox"], ' +
+      '[class*="custom-select"]:not(select), ' +
+      '[class*="searchable-select"], ' +
+      '[class*="ss-single-selected"], ' +
+      '[class*="choices__inner"]'
+    ).forEach(f => {
+      if (seen.has(f)) return;
+      const question = getQuestionText(f);
+      if (!question || question.length < 2) return;
+      seen.add(f);
+      fields.push({ element: f, question, type: 'custom-select' });
+    });
+
     return fields;
   }
 
@@ -235,8 +276,9 @@
     // Try exact value match first (skip placeholder options)
     for (const opt of element.options) {
       if (!opt.value) continue;
-      if (opt.value.toLowerCase().trim() === normalVal ||
-          opt.textContent.toLowerCase().trim() === normalVal) {
+      const optText = opt.textContent.toLowerCase().trim();
+      const optVal = opt.value.toLowerCase().trim();
+      if (optVal === normalVal || optText === normalVal) {
         element.value = opt.value;
         matched = true;
         break;
@@ -249,6 +291,9 @@
         if (!opt.value) continue;
         const optText = opt.textContent.toLowerCase().trim();
         const optVal = opt.value.toLowerCase().trim();
+        // skip placeholder-looking options
+        if (optText === 'select' || optText === 'select.' || optText === 'select...' ||
+            optText === 'select an option' || optText === '' || optText === '--') continue;
         if (optText.includes(normalVal) || normalVal.includes(optText) ||
             optVal.includes(normalVal) || normalVal.includes(optVal)) {
           element.value = opt.value;
@@ -258,11 +303,35 @@
       }
     }
 
+    // Try word overlap match -- for cases like "Decline To Self Identify" vs
+    // "I don't wish to self-identify" or "Prefer not to say"
+    if (!matched) {
+      const valWords = new Set(normalVal.split(/\s+/));
+      let bestOverlap = 0;
+      let bestOpt = null;
+      for (const opt of element.options) {
+        if (!opt.value) continue;
+        const optText = opt.textContent.toLowerCase().trim();
+        if (optText === 'select' || optText === 'select.' || optText === '' || optText === '--') continue;
+        const optWords = new Set(optText.split(/\s+/));
+        const overlap = [...valWords].filter(w => optWords.has(w)).length;
+        if (overlap > bestOverlap && overlap >= 2) {
+          bestOverlap = overlap;
+          bestOpt = opt;
+        }
+      }
+      if (bestOpt) {
+        element.value = bestOpt.value;
+        matched = true;
+      }
+    }
+
     // Try starts-with match for partial answers like "4+" matching "4+ years"
     if (!matched) {
       for (const opt of element.options) {
         if (!opt.value) continue;
         const optText = opt.textContent.toLowerCase().trim();
+        if (optText === 'select' || optText === 'select.' || optText === '' || optText === '--') continue;
         if (optText.startsWith(normalVal) || normalVal.startsWith(optText)) {
           element.value = opt.value;
           matched = true;
@@ -316,7 +385,115 @@
     return false;
   }
 
+  // Fill custom searchable dropdowns (non-native select components)
+  // Strategy: click trigger -> find search input -> type value -> click matching option
+  async function fillCustomSelect(element, value) {
+    try {
+      // Step 1: Click the trigger to open the dropdown
+      element.click();
+      element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      element.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+
+      // Step 2: Wait for listbox/options to appear
+      await new Promise(r => setTimeout(r, 300));
+
+      // Step 3: Look for a search input inside the opened dropdown
+      const container = element.closest(
+        '[class*="field"], [class*="form-group"], [class*="form-component"], ' +
+        '[class*="select"], [class*="dropdown"]'
+      ) || element.parentElement;
+
+      const searchInput = container?.querySelector(
+        'input[type="search"], input[type="text"][class*="search"], ' +
+        'input[role="searchbox"], input[role="combobox"], ' +
+        'input[class*="filter"], input[class*="search"], ' +
+        'input[placeholder*="search" i], input[placeholder*="type" i]'
+      );
+
+      if (searchInput) {
+        // Type the value into the search box
+        fillTextField(searchInput, value);
+        await new Promise(r => setTimeout(r, 500));
+      }
+
+      // Step 4: Find and click the matching option
+      const listbox = document.querySelector(
+        '[role="listbox"]:not([style*="display: none"]), ' +
+        '[role="listbox"]:not([hidden]), ' +
+        '[class*="dropdown-menu"]:not([hidden]), ' +
+        '[class*="options"]:not([hidden]), ' +
+        '[class*="select-menu"]:not([hidden]), ' +
+        'ul[class*="list"]:not([hidden])'
+      ) || container;
+
+      if (listbox) {
+        const normalVal = value.toLowerCase().trim();
+        const options = listbox.querySelectorAll(
+          '[role="option"], li, [class*="option"], [class*="item"]'
+        );
+
+        for (const opt of options) {
+          const optText = opt.textContent.trim().toLowerCase();
+          if (optText === normalVal || optText.includes(normalVal) || normalVal.includes(optText)) {
+            opt.click();
+            opt.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+            opt.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+            return true;
+          }
+        }
+      }
+
+      // Step 5: If no match found, close the dropdown by pressing Escape
+      element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function fillField(field, value) {
+    // Safety: if element is actually a <select>, use select fill regardless of type label
+    if (field.element.tagName === 'SELECT') {
+      return fillSelect(field.element, value);
+    }
+
+    // For text/textarea fields: ALWAYS check if there's a sibling <select> in the
+    // same form group. Many ATS platforms (Greenhouse, LinkedIn, Workday) render a
+    // visible text input as a display layer over a hidden native <select>.
+    // If we find one and can match an option, fill the select instead of typing text.
+    if (field.type === 'text' || field.type === 'textarea') {
+      const container = field.element.closest(
+        '[class*="field"], [class*="form-component"], [class*="form-group"], ' +
+        '[class*="fb-dash"], [class*="question"], [class*="jobs-easy-apply"], ' +
+        '[class*="select"], [class*="dropdown"], [class*="application-question"]'
+      );
+      if (container) {
+        const nearbySelect = container.querySelector('select');
+        if (nearbySelect && nearbySelect !== field.element) {
+          const filled = fillSelect(nearbySelect, value);
+          if (filled) return true;
+        }
+      }
+      // Also check siblings and parent's siblings
+      const parent = field.element.parentElement;
+      if (parent) {
+        const siblingSelect = parent.querySelector('select');
+        if (siblingSelect && siblingSelect !== field.element) {
+          const filled = fillSelect(siblingSelect, value);
+          if (filled) return true;
+        }
+        // Check grandparent
+        const grandparent = parent.parentElement;
+        if (grandparent) {
+          const gpSelect = grandparent.querySelector('select');
+          if (gpSelect && gpSelect !== field.element) {
+            const filled = fillSelect(gpSelect, value);
+            if (filled) return true;
+          }
+        }
+      }
+    }
+
     switch (field.type) {
       case 'text':
       case 'textarea':
@@ -331,6 +508,8 @@
         return fillRadio(field, value);
       case 'checkbox':
         return fillCheckbox(field.element, value);
+      case 'custom-select':
+        return fillCustomSelect(field.element, value);
       default:
         return false;
     }
@@ -359,7 +538,19 @@
         // first option is usually the placeholder
         if (idx <= 0) return true;
         const val = field.element.value;
-        return !val || val === '' || val === 'select' || val === 'placeholder';
+        if (!val || val === '') return true;
+        // common placeholder values
+        const lv = val.toLowerCase();
+        if (lv === 'select' || lv === 'placeholder' || lv === 'select...' ||
+            lv === 'select an option' || lv === 'choose' || lv === 'choose...' ||
+            lv === '--' || lv === '- select -') return true;
+        // check if the selected option text is a placeholder
+        const optText = field.element.options[idx]?.textContent?.trim().toLowerCase() || '';
+        if (optText === 'select' || optText === 'select.' || optText === 'select...' ||
+            optText === 'select an option' || optText === 'choose' ||
+            optText === 'choose...' || optText === '- select -' ||
+            optText === '--select--' || optText === '') return true;
+        return false;
       }
       case 'radio':
         return !field.options.some(o => o.element.checked);
@@ -367,6 +558,13 @@
         return !field.element.checked;
       case 'contenteditable':
         return !field.element.textContent.trim();
+      case 'custom-select': {
+        // Check if the custom select shows a placeholder
+        const text = field.element.textContent.trim().toLowerCase();
+        return !text || text === 'select' || text === 'select...' ||
+               text === 'select an option' || text === 'choose' ||
+               text === 'choose...' || text === '--' || text === '- select -';
+      }
       default:
         return !field.element.value.trim();
     }
@@ -609,11 +807,30 @@
     let lastValue = getFieldValue(field);
     field.element.addEventListener('blur', async () => {
       const currentValue = getFieldValue(field);
-      if (currentValue && currentValue.length > 20 && currentValue !== lastValue) {
+      if (currentValue && currentValue.length > 3 && currentValue !== lastValue) {
+        lastValue = currentValue;
+        // Always prompt to save -- even if a similar question exists,
+        // the user may have typed a better/different answer
+        const matches = await findMatches(field.question);
+        const topMatch = matches[0];
+        // Only skip if the EXACT same answer text is already saved
+        const alreadySaved = topMatch && topMatch.answer.trim().toLowerCase() === currentValue.trim().toLowerCase();
+        if (!alreadySaved) {
+          showSavePromptBanner(field, currentValue);
+        }
+      }
+    });
+
+    // Also watch for changes via input event (for React-controlled fields that
+    // might not fire blur in the expected order)
+    field.element.addEventListener('change', async () => {
+      const currentValue = getFieldValue(field);
+      if (currentValue && currentValue.length > 3 && currentValue !== lastValue) {
         lastValue = currentValue;
         const matches = await findMatches(field.question);
         const topMatch = matches[0];
-        if (!topMatch || topMatch.score < 0.7) {
+        const alreadySaved = topMatch && topMatch.answer.trim().toLowerCase() === currentValue.trim().toLowerCase();
+        if (!alreadySaved) {
           showSavePromptBanner(field, currentValue);
         }
       }
@@ -621,12 +838,13 @@
   }
 
   function showSavePromptBanner(field, answer) {
-    if (document.querySelector('.autofill-save-banner')) return;
+    // Remove existing banners
+    document.querySelectorAll('.autofill-save-banner').forEach(b => b.remove());
 
     const banner = document.createElement('div');
     banner.className = 'autofill-save-banner';
     banner.innerHTML = `
-      <span>💾 Save this answer for future applications?</span>
+      <span>💾 Save "<strong>${escapeHtml(field.question.substring(0, 50))}</strong>" → "${escapeHtml(answer.substring(0, 40))}${answer.length > 40 ? '...' : ''}"?</span>
       <button class="autofill-banner-save">Save</button>
       <button class="autofill-banner-dismiss">&times;</button>
     `;
@@ -635,80 +853,90 @@
       await addPair(field.question, answer, window.location.hostname);
       banner.remove();
       showToast('Answer saved!');
-      setTimeout(scanPage, 500);
     });
 
     banner.querySelector('.autofill-banner-dismiss').addEventListener('click', () => {
       banner.remove();
     });
 
-    const rect = field.element.getBoundingClientRect();
-    banner.style.top = `${window.scrollY + rect.top - 45}px`;
-    banner.style.left = `${window.scrollX + rect.left}px`;
     document.body.appendChild(banner);
-    setTimeout(() => banner.remove(), 10000);
+    setTimeout(() => banner.remove(), 15000);
   }
 
   // ---- Main scan + auto-populate ----
 
   let autoFillCount = 0;
+  let isScanning = false;
+  const filledFields = new WeakSet();  // track fields we already processed
 
   async function scanPage() {
-    const fields = findAllFields();
-    const profile = await getProfile();
-    autoFillCount = 0;
+    if (isScanning) return;
+    isScanning = true;
 
-    for (const field of fields) {
-      // Skip fields already filled
-      if (!isFieldEmpty(field)) {
+    try {
+      const fields = findAllFields();
+      const profile = await getProfile();
+      autoFillCount = 0;
+
+      for (const field of fields) {
+        // Always set up the save watcher, even for filled fields
         watchForNewAnswers(field);
-        continue;
-      }
 
-      // 1. Try profile data first (name, email, phone, etc.)
-      const profileKey = matchProfileField(field.question);
-      if (profileKey && profile && profile[profileKey]) {
-        fillField(field, profile[profileKey]);
-        autoFillCount++;
-        continue;
-      }
+        // Skip fields we already processed for auto-fill
+        if (filledFields.has(field.element)) continue;
 
-      // 2. Try QA matching
-      const matches = await findMatches(field.question);
-
-      if (matches.length > 0 && matches[0].score >= 0.5) {
-        // High confidence: auto-fill directly
-        const best = matches[0];
-
-        if (field.type === 'text' || field.type === 'textarea' || field.type === 'contenteditable') {
-          // For long text answers, auto-fill and show the button for alternatives
-          fillField(field, best.answer);
-          incrementUse(best.id);
-          autoFillCount++;
-          if (matches.length > 1) {
-            createAutofillButton(field, matches);
-          }
-        } else if (field.type === 'select' || field.type === 'radio' || field.type === 'checkbox') {
-          // For choice fields, auto-select directly
-          const filled = fillField(field, best.answer);
-          if (filled) {
-            incrementUse(best.id);
-            autoFillCount++;
-          } else {
-            // Couldn't match option text -- show button for manual selection
-            createAutofillButton(field, matches);
-          }
+        // Skip fields already filled (by user or by us)
+        if (!isFieldEmpty(field)) {
+          filledFields.add(field.element);
+          continue;
         }
-      } else if (matches.length > 0) {
-        // Low confidence: show button, don't auto-fill
-        createAutofillButton(field, matches);
+
+        // 1. Try profile data first (name, email, phone, etc.)
+        const profileKey = matchProfileField(field.question);
+        if (profileKey && profile && profile[profileKey]) {
+          fillField(field, profile[profileKey]);
+          filledFields.add(field.element);
+          autoFillCount++;
+          continue;
+        }
+
+        // 2. Try QA matching
+        const matches = await findMatches(field.question);
+
+        if (matches.length > 0 && matches[0].score >= 0.5) {
+          const best = matches[0];
+
+          if (field.type === 'text' || field.type === 'textarea' || field.type === 'contenteditable') {
+            fillField(field, best.answer);
+            incrementUse(best.id);
+            filledFields.add(field.element);
+            autoFillCount++;
+            if (matches.length > 1) {
+              createAutofillButton(field, matches);
+            }
+          } else if (field.type === 'select' || field.type === 'radio' || field.type === 'checkbox') {
+            const filled = fillField(field, best.answer);
+            if (filled) {
+              incrementUse(best.id);
+              filledFields.add(field.element);
+              autoFillCount++;
+            } else {
+              createAutofillButton(field, matches);
+            }
+          }
+        } else if (matches.length > 0) {
+          createAutofillButton(field, matches);
+        }
+
+        // Mark as processed even if no match, so we don't re-check
+        filledFields.add(field.element);
       }
 
-      watchForNewAnswers(field);
-    }
-
-    if (autoFillCount > 0) {
-      showToast(`✨ Auto-filled ${autoFillCount} field${autoFillCount > 1 ? 's' : ''}`);
+      if (autoFillCount > 0) {
+        showToast(`✨ Auto-filled ${autoFillCount} field${autoFillCount > 1 ? 's' : ''}`);
+      }
+    } finally {
+      isScanning = false;
     }
   }
 
@@ -716,6 +944,8 @@
   // Shows when there are fillable fields on the page.
 
   function createFillAllButton() {
+    // Only show in the top frame, not inside iframes (avoids duplicate buttons)
+    if (window !== window.top) return;
     if (document.getElementById('autofill-fill-all')) return;
 
     const btn = document.createElement('div');
@@ -784,9 +1014,45 @@
   }, 1500);
 
   // Re-scan on DOM changes (SPAs, dynamically loaded forms)
-  const observer = new MutationObserver(() => {
-    clearTimeout(observer._debounce);
-    observer._debounce = setTimeout(scanPage, 2000);
+  // Detect new form elements in modals, dialogs, and dynamic content
+  const observer = new MutationObserver((mutations) => {
+    let hasNewFormElements = false;
+
+    for (const m of mutations) {
+      for (const node of m.addedNodes) {
+        if (node.nodeType !== 1) continue;
+        // Skip our own UI elements
+        if (node.classList?.contains('autofill-btn') ||
+            node.classList?.contains('autofill-popup') ||
+            node.classList?.contains('autofill-toast') ||
+            node.classList?.contains('autofill-save-banner') ||
+            node.classList?.contains('autofill-fill-all-btn')) continue;
+
+        // Check if this is a modal/dialog or contains form elements
+        const isModal = node.matches?.('[role="dialog"], [role="modal"], [class*="modal"], [class*="dialog"], [class*="overlay"], [class*="artdeco-modal"]');
+        const hasFormFields = node.querySelector?.('input, textarea, select, [contenteditable], [role="radio"], [role="listbox"], [role="combobox"]');
+        const isFormField = node.matches?.('input, textarea, select, [contenteditable]');
+
+        if (isModal || hasFormFields || isFormField) {
+          hasNewFormElements = true;
+          // Clear filledFields for elements inside this new container
+          // so they get processed on the next scan
+          if (node.querySelectorAll) {
+            node.querySelectorAll('input, textarea, select, [contenteditable]').forEach(el => {
+              filledFields.delete(el);
+            });
+          }
+          if (isFormField) filledFields.delete(node);
+          break;
+        }
+      }
+      if (hasNewFormElements) break;
+    }
+
+    if (hasNewFormElements) {
+      clearTimeout(observer._debounce);
+      observer._debounce = setTimeout(scanPage, 1000);
+    }
   });
   observer.observe(document.body, { childList: true, subtree: true });
 
