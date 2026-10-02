@@ -1,10 +1,10 @@
 {
   "manifest_version": 2,
-  "name": "Job Application Autofill",
-  "version": "2.0.0",
+  "name": "Filli",
+  "version": "2.1.0",
   "description": "Auto-fill job application forms from saved Q&A pairs and profile data. Handles text, dropdowns, radio buttons, and checkboxes. Learns new answers as you apply.",
   "author": "Dinakar Meruga",
-  "homepage_url": "https://github.com/dinakar124/job-autofill-extension",
+  "homepage_url": "https://github.com/dinakar124/filli_app",
   "permissions": [
     "storage",
     "activeTab",
@@ -34,6 +34,7 @@
       "matches": [
         "*://boards.greenhouse.io/*",
         "*://job-boards.greenhouse.io/*",
+        "*://boards-api.greenhouse.io/*",
         "*://jobs.lever.co/*",
         "*://jobs.ashbyhq.com/*",
         "*://*.myworkdayjobs.com/*",
@@ -70,7 +71,8 @@
       ],
       "js": ["content/autofill.js"],
       "css": ["content/autofill.css"],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "all_frames": true
     }
   ],
   "background": {

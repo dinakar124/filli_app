@@ -12,7 +12,9 @@
     "postalCode": "",
     "school": "St. Cloud State University",
     "degree": "Master's Degree",
-    "major": "Computer Science"
+    "major": "Computer Science",
+    "country": "United States",
+    "countryCode": "United States"
   },
   "pairs": [
     {
@@ -273,6 +275,116 @@
       "tags": ["demographic", "voluntary"],
       "created": "2026-09-30T21:35:00.000Z",
       "updated": "2026-09-30T21:35:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-hispanic-latino",
+      "question": "Are you Hispanic/Latino?",
+      "answer": "Decline To Self Identify",
+      "source": "greenhouse",
+      "tags": ["demographic", "eeoc"],
+      "created": "2026-09-30T21:45:00.000Z",
+      "updated": "2026-09-30T21:45:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-eeoc-gender",
+      "question": "Gender",
+      "answer": "Decline To Self Identify",
+      "source": "greenhouse",
+      "tags": ["demographic", "eeoc"],
+      "created": "2026-09-30T21:45:00.000Z",
+      "updated": "2026-09-30T21:45:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-eeoc-veteran",
+      "question": "Veteran Status",
+      "answer": "I am not a protected veteran",
+      "source": "greenhouse",
+      "tags": ["demographic", "eeoc"],
+      "created": "2026-09-30T21:45:00.000Z",
+      "updated": "2026-09-30T21:45:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-country",
+      "question": "Country",
+      "answer": "United States",
+      "source": "common",
+      "tags": ["profile", "location"],
+      "created": "2026-09-30T21:45:00.000Z",
+      "updated": "2026-09-30T21:45:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-country-code",
+      "question": "Country Code",
+      "answer": "United States",
+      "source": "common",
+      "tags": ["profile", "phone"],
+      "created": "2026-09-30T21:45:00.000Z",
+      "updated": "2026-09-30T21:45:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-hear-about",
+      "question": "How did you hear about this job?",
+      "answer": "LinkedIn",
+      "source": "common",
+      "tags": ["referral", "quick"],
+      "created": "2026-09-30T21:49:00.000Z",
+      "updated": "2026-09-30T21:49:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-current-company",
+      "question": "Please provide the name of your current (or most recent) company",
+      "answer": "Amazon",
+      "source": "common",
+      "tags": ["profile", "work-history"],
+      "created": "2026-09-30T21:49:00.000Z",
+      "updated": "2026-09-30T21:49:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-current-title",
+      "question": "Current job title",
+      "answer": "Software Development Engineer II",
+      "source": "common",
+      "tags": ["profile", "work-history"],
+      "created": "2026-09-30T21:49:00.000Z",
+      "updated": "2026-09-30T21:49:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-previously-employed",
+      "question": "Are you currently, or have you ever, been employed by this company?",
+      "answer": "No",
+      "source": "greenhouse",
+      "tags": ["quick"],
+      "created": "2026-09-30T21:49:00.000Z",
+      "updated": "2026-09-30T21:49:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-start-date",
+      "question": "What is your desired start date?",
+      "answer": "As soon as possible",
+      "source": "common",
+      "tags": ["quick"],
+      "created": "2026-09-30T21:49:00.000Z",
+      "updated": "2026-09-30T21:49:00.000Z",
+      "useCount": 0
+    },
+    {
+      "id": "seed-salary-expectation",
+      "question": "What are your salary expectations?",
+      "answer": "Open to discussing based on total compensation package",
+      "source": "common",
+      "tags": ["compensation"],
+      "created": "2026-09-30T21:49:00.000Z",
+      "updated": "2026-09-30T21:49:00.000Z",
       "useCount": 0
     }
   ]
